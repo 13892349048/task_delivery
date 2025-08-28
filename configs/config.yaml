@@ -1,0 +1,61 @@
+# 默认配置文件
+app:
+  name: "TaskManage"
+  version: "1.0.0"
+  environment: "development"
+  debug: true
+
+server:
+  host: "0.0.0.0"
+  port: 8080
+  read_timeout: 60
+  write_timeout: 60
+  idle_timeout: 120
+
+database:
+  driver: "mysql"
+  host: "localhost"
+  port: 3306
+  username: "taskmanage"
+  password: "taskmanage123"
+  database: "taskmanage"
+  charset: "utf8mb4"
+  max_idle_conns: 10
+  max_open_conns: 100
+  conn_max_lifetime: 3600
+
+redis:
+  host: "localhost"
+  port: 6379
+  password: ""
+  database: 0
+  max_retries: 3
+  pool_size: 10
+  min_idle_conn: 5
+
+jwt:
+  secret: "your-super-secret-jwt-key-at-least-32-chars-long"
+  access_token_ttl: 3600    # 1小时
+  refresh_token_ttl: 604800 # 7天
+  issuer: "taskmanage"
+  refresh_threshold: 1800   # 30分钟
+
+asynq:
+  redis_addr: "localhost:6379"
+  redis_password: ""
+  redis_db: 1
+  concurrency: 10
+  queues:
+    critical: 6
+    default: 3
+    low: 1
+
+log:
+  level: "debug"
+  format: "json"
+  output: "stdout"
+  filename: "logs/app.log"
+  max_size: 100
+  max_backups: 5
+  max_age: 30
+  compress: true

@@ -1,0 +1,61 @@
+# 开发环境配置
+app:
+  name: "TaskManage-Dev"
+  version: "1.0.0"
+  environment: "development"
+  debug: true
+
+server:
+  host: "localhost"
+  port: 8080
+  read_timeout: 60
+  write_timeout: 60
+  idle_timeout: 120
+
+database:
+  driver: "mysql"
+  host: "localhost"
+  port: 3306
+  username: "root"
+  password: "123456"
+  database: "taskmanage_dev"
+  charset: "utf8mb4"
+  max_idle_conns: 5
+  max_open_conns: 25
+  conn_max_lifetime: 3600
+
+redis:
+  host: "localhost"
+  port: 6379
+  password: ""
+  database: 0
+  max_retries: 3
+  pool_size: 5
+  min_idle_conn: 2
+
+jwt:
+  secret: "dev-jwt-secret-key-for-development-only-32chars"
+  access_token_ttl: 7200    # 2小时 (开发环境更长)
+  refresh_token_ttl: 604800 # 7天
+  issuer: "taskmanage-dev"
+  refresh_threshold: 3600   # 1小时
+
+asynq:
+  redis_addr: "localhost:6379"
+  redis_password: ""
+  redis_db: 1
+  concurrency: 5
+  queues:
+    critical: 3
+    default: 2
+    low: 1
+
+log:
+  level: "debug"
+  format: "text"
+  output: "stdout"
+  filename: "logs/dev.log"
+  max_size: 50
+  max_backups: 3
+  max_age: 7
+  compress: false
