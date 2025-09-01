@@ -1,0 +1,596 @@
+{
+	"info": {
+		"_postman_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+		"name": "TaskManage Complete Workflow Tests",
+		"description": "完整的TaskManage系统工作流程测试，包括用户认证、新员工入职、权限分配和审批流程",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{access_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8081",
+			"type": "string"
+		},
+		{
+			"key": "access_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "refresh_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "user_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "employee_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "workflow_instance_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "permission_template_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "permission_assignment_id",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "1. 系统健康检查",
+			"item": [
+				{
+					"name": "Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/health",
+							"host": ["{{base_url}}"],
+							"path": ["health"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "2. 用户认证流程",
+			"item": [
+				{
+					"name": "管理员登录",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"var jsonData = pm.response.json();",
+									"pm.environment.set('access_token', jsonData.data.access_token);",
+									"pm.environment.set('user_id', jsonData.data.user.id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"admin\",\n    \"password\": \"admin123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/login",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "auth", "login"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "3. 权限模板管理",
+			"item": [
+				{
+					"name": "创建新员工权限模板",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"var jsonData = pm.response.json();",
+									"pm.environment.set('permission_template_id', jsonData.data.id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"新员工基础权限模板\",\n    \"code\": \"new_employee_basic\",\n    \"description\": \"新员工入职时的基础权限配置\",\n    \"category\": \"onboarding\",\n    \"level\": 1\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/permissions/templates",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "permissions", "templates"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "4. 新员工入职流程",
+			"item": [
+				{
+					"name": "创建待入职员工",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"var jsonData = pm.response.json();",
+									"pm.environment.set('employee_id', jsonData.data.id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"real_name\": \"张三\",\n    \"email\": \"zhangsan@company.com\",\n    \"phone\": \"13800138000\",\n    \"expected_date\": \"2024-01-15\",\n    \"department_id\": 1,\n    \"position_id\": 1,\n    \"notes\": \"新入职的后端开发工程师\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/onboarding/pending",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "onboarding", "pending"]
+						}
+					}
+				},
+				{
+					"name": "启动入职审批流程",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"var jsonData = pm.response.json();",
+									"pm.environment.set('workflow_instance_id', jsonData.data.workflow_instance_id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"employee_id\": {{employee_id}},\n    \"department_id\": 1,\n    \"position_id\": 1,\n    \"expected_date\": \"2024-01-15\",\n    \"probation_days\": 90,\n    \"workflow_type\": \"full\",\n    \"notes\": \"请审批新员工张三的入职申请\",\n    \"requester_id\": {{user_id}}\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/onboarding/approval/start",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "onboarding", "approval", "start"]
+						}
+					}
+				}
+			],
+			"description": "新员工入职流程测试，包括创建待入职员工和启动审批流程"
+		},
+		{
+			"name": "5. 入职审批流程",
+			"item": [
+				{
+					"name": "审批入职申请",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"instance_id\": \"{{workflow_instance_id}}\",\n  \"node_id\": \"approval_node\",\n  \"action\": \"approve\",\n  \"comment\": \"审批通过，同意入职\",\n  \"approved_by\": 1\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/workflows/approvals/process",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "workflows", "approvals", "process"]
+						}
+					}
+				},
+				{
+					"name": "确认员工入职",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"employee_id\": {{employee_id}},\n    \"username\": \"zhangsan\",\n    \"password\": \"temp123456\",\n    \"role_id\": 3\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/onboarding/confirm",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "onboarding", "confirm"]
+						}
+					}
+				}
+			],
+			"description": "入职审批流程测试，包括审批决定和员工确认"
+		},
+		{
+			"name": "6. 权限分配流程",
+			"item": [
+				{
+					"name": "创建入职权限配置",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"onboarding_stage\": \"probation\",\n    \"template_id\": {{permission_template_id}},\n    \"conditions\": {\n        \"department_id\": 1,\n        \"position_level\": \"junior\"\n    },\n    \"auto_assign\": true,\n    \"is_active\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/permissions/onboarding-configs",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "permissions", "onboarding-configs"]
+						}
+					}
+				},
+				{
+					"name": "分配权限给员工",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"var jsonData = pm.response.json();",
+									"pm.environment.set('permission_assignment_id', jsonData.data.id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"user_id\": {{employee_id}},\n    \"permissions\": [\n        {\n            \"resource\": \"task\",\n            \"action\": \"read\",\n            \"conditions\": {\"assignee_only\": true}\n        },\n        {\n            \"resource\": \"employee\",\n            \"action\": \"read\",\n            \"conditions\": {\"self_only\": true}\n        }\n    ],\n    \"reason\": \"新员工基础权限分配\",\n    \"expires_at\": \"2024-12-31T23:59:59Z\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/permissions/assignments",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "permissions", "assignments"]
+						}
+					}
+				},
+				{
+					"name": "审批权限分配",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"assignment_id\": {{permission_assignment_id}},\n    \"decision\": \"approved\",\n    \"comments\": \"权限分配合理，同意授权\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/permissions/assignments/{{permission_assignment_id}}/approve",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "permissions", "assignments", "{{permission_assignment_id}}", "approve"]
+						}
+					}
+				}
+			],
+			"description": "权限分配流程测试，包括配置创建、权限分配和审批"
+		},
+		{
+			"name": "7. 任务管理测试",
+			"item": [
+				{
+					"name": "创建任务",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"var jsonData = pm.response.json();",
+									"pm.environment.set('task_id', jsonData.data.id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"开发用户管理模块\",\n    \"description\": \"实现用户注册、登录、权限管理等功能\",\n    \"priority\": \"high\",\n    \"due_date\": \"2024-02-15T18:00:00Z\",\n    \"estimated_hours\": 40,\n    \"required_skills\": [\"Java\", \"Spring Boot\", \"MySQL\"],\n    \"department_id\": 1,\n    \"project_id\": 1\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/tasks",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "tasks"]
+						}
+					}
+				},
+				{
+					"name": "分配任务给员工",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"task_id\": {{task_id}},\n    \"assignee_id\": {{employee_id}},\n    \"reason\": \"该员工具备相关技能，适合承担此任务\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/assignments/manual",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "assignments", "manual"]
+						}
+					}
+				},
+				{
+					"name": "查询任务列表",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/tasks?page=1&limit=10&status=assigned",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "tasks"],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "status",
+									"value": "assigned"
+								}
+							]
+						}
+					}
+				}
+			],
+			"description": "任务管理测试，包括任务创建、分配和查询"
+		},
+		{
+			"name": "8. 系统查询测试",
+			"item": [
+				{
+					"name": "查询权限模板列表",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/permissions/templates?page=1&limit=10",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "permissions", "templates"],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "查询权限分配历史",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/permissions/assignments/history?user_id={{employee_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "permissions", "assignments", "history"],
+							"query": [
+								{
+									"key": "user_id",
+									"value": "{{employee_id}}"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "查询待审批事项",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/workflows/approvals/pending",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "workflows", "approvals", "pending"]
+						}
+					}
+				},
+				{
+					"name": "查询员工状态",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/employees/{{employee_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "employees", "{{employee_id}}"]
+						}
+					}
+				}
+			],
+			"description": "系统查询测试，包括各种数据查询和状态检查"
+		}
+	]
+}

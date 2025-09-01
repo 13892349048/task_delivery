@@ -116,6 +116,13 @@ func InternalError(c *gin.Context, message string) {
 	})
 }
 
+func StatusNotFound(c *gin.Context, message string) {
+	c.JSON(http.StatusNotFound, Response{
+		Code:    ErrCodeNotFound,
+		Message: message,
+	})
+}
+
 // PaginationResponse 分页响应结构
 type PaginationResponse struct {
 	Code       ErrorCode   `json:"code"`
@@ -135,7 +142,7 @@ type Pagination struct {
 // SuccessWithPagination 带分页的成功响应
 func SuccessWithPagination(c *gin.Context, data interface{}, page, pageSize int, total int64) {
 	totalPages := int((total + int64(pageSize) - 1) / int64(pageSize))
-	
+
 	c.JSON(http.StatusOK, PaginationResponse{
 		Code:    ErrCodeSuccess,
 		Message: "操作成功",

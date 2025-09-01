@@ -1,0 +1,542 @@
+{
+	"info": {
+		"_postman_id": "taskmanage-complete-api-tests",
+		"name": "TaskManage Complete API Tests",
+		"description": "完整的任务管理系统API测试集合",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{access_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8081"
+		},
+		{
+			"key": "access_token",
+			"value": ""
+		},
+		{
+			"key": "user_id",
+			"value": ""
+		},
+		{
+			"key": "task_id",
+			"value": ""
+		},
+		{
+			"key": "employee_id",
+			"value": ""
+		},
+		{
+			"key": "workflow_definition_id",
+			"value": "task_assignment_approval"
+		}
+	],
+	"item": [
+		{
+			"name": "1. 系统健康检查",
+			"item": [
+				{
+					"name": "系统状态",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/",
+							"host": ["{{base_url}}"],
+							"path": [""]
+						}
+					}
+				},
+				{
+					"name": "健康检查",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/health",
+							"host": ["{{base_url}}"],
+							"path": ["health"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "2. 用户认证",
+			"item": [
+				{
+					"name": "用户注册",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    if (response.data && response.data.user_id) {",
+									"        pm.globals.set('user_id', response.data.user_id);",
+									"    }",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"testuser\",\n    \"password\": \"password123\",\n    \"email\": \"test@example.com\",\n    \"real_name\": \"测试用户\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/register",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "auth", "register"]
+						}
+					}
+				},
+				{
+					"name": "用户登录",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    if (response.data) {",
+									"        pm.globals.set('access_token', response.data.access_token);",
+									"        pm.globals.set('user_id', response.data.user_id);",
+									"    }",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"testuser\",\n    \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/login",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "auth", "login"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "3. 员工管理",
+			"item": [
+				{
+					"name": "创建员工",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    if (response.data && response.data.id) {",
+									"        pm.globals.set('employee_id', response.data.id);",
+									"    }",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"user_id\": {{user_id}},\n    \"employee_id\": \"EMP001\",\n    \"department\": \"技术部\",\n    \"position\": \"软件工程师\",\n    \"status\": \"active\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/employees",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "employees"]
+						}
+					}
+				},
+				{
+					"name": "获取员工列表",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/employees",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "employees"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "4. 任务管理",
+			"item": [
+				{
+					"name": "创建任务",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    if (response.data && response.data.id) {",
+									"        pm.globals.set('task_id', response.data.id);",
+									"    }",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"开发用户管理模块\",\n    \"description\": \"实现用户注册、登录、权限管理等功能\",\n    \"priority\": \"high\",\n    \"estimated_hours\": 40\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/tasks",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "tasks"]
+						}
+					}
+				},
+				{
+					"name": "获取任务列表",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/tasks",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "tasks"]
+						}
+					}
+				},
+				{
+					"name": "分配任务",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"assignee_id\": {{employee_id}}\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/tasks/{{task_id}}/assign",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "tasks", "{{task_id}}", "assign"]
+						}
+					}
+				},
+				{
+					"name": "自动分配任务",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"algorithm\": \"comprehensive_score\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/tasks/{{task_id}}/auto-assign",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "tasks", "{{task_id}}", "auto-assign"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "6. 工作流管理",
+			"item": [
+				{
+					"name": "创建工作流定义",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    if (response.data && response.data.id) {",
+									"        pm.globals.set('workflow_definition_id', response.data.id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"id\": \"task_assignment_approval\",\n  \"name\": \"任务分配审批流程\",\n  \"description\": \"用于任务分配的标准审批流程\",\n  \"version\": \"1.0\",\n  \"nodes\": [\n    {\n      \"id\": \"start\",\n      \"type\": \"start\",\n      \"name\": \"开始\",\n      \"position\": {\"x\": 100, \"y\": 100}\n    },\n    {\n      \"id\": \"manager_approval\",\n      \"type\": \"approval\",\n      \"name\": \"直属上级审批\",\n      \"config\": {\n        \"assignees\": [{\"type\": \"manager\", \"value\": \"requester\"}],\n        \"approval_type\": \"any\",\n        \"can_delegate\": true,\n        \"can_return\": true,\n        \"priority\": 1\n      },\n      \"position\": {\"x\": 300, \"y\": 100}\n    },\n    {\n      \"id\": \"priority_check\",\n      \"type\": \"condition\",\n      \"name\": \"优先级检查\",\n      \"config\": {\n        \"conditions\": [\n          {\"expression\": \"priority == 'high'\", \"target\": \"director_approval\", \"priority\": 1},\n          {\"expression\": \"priority != 'high'\", \"target\": \"auto_approve\", \"priority\": 2}\n        ]\n      },\n      \"position\": {\"x\": 500, \"y\": 100}\n    },\n    {\n      \"id\": \"director_approval\",\n      \"type\": \"approval\",\n      \"name\": \"总监审批\",\n      \"config\": {\n        \"assignees\": [{\"type\": \"role\", \"value\": \"director\"}],\n        \"approval_type\": \"any\",\n        \"can_delegate\": false,\n        \"can_return\": true,\n        \"priority\": 2\n      },\n      \"position\": {\"x\": 500, \"y\": 300}\n    },\n    {\n      \"id\": \"auto_approve\",\n      \"type\": \"script\",\n      \"name\": \"自动审批\",\n      \"config\": {\n        \"script\": \"auto_approve_task_assignment\"\n      },\n      \"position\": {\"x\": 700, \"y\": 100}\n    },\n    {\n      \"id\": \"notify_result\",\n      \"type\": \"notification\",\n      \"name\": \"通知结果\",\n      \"config\": {\n        \"type\": \"system\",\n        \"template\": \"task_assignment_approved\",\n        \"recipients\": [\"requester\", \"assignee\"]\n      },\n      \"position\": {\"x\": 900, \"y\": 200}\n    },\n    {\n      \"id\": \"end\",\n      \"type\": \"end\",\n      \"name\": \"结束\",\n      \"position\": {\"x\": 1100, \"y\": 200}\n    }\n  ],\n  \"edges\": [\n    {\"id\": \"start_to_manager\", \"from\": \"start\", \"to\": \"manager_approval\"},\n    {\"id\": \"manager_to_priority\", \"from\": \"manager_approval\", \"to\": \"priority_check\", \"condition\": \"action == 'approve'\"},\n    {\"id\": \"priority_to_director\", \"from\": \"priority_check\", \"to\": \"director_approval\"},\n    {\"id\": \"priority_to_auto\", \"from\": \"priority_check\", \"to\": \"auto_approve\"},\n    {\"id\": \"director_to_notify\", \"from\": \"director_approval\", \"to\": \"notify_result\", \"condition\": \"action == 'approve'\"},\n    {\"id\": \"auto_to_notify\", \"from\": \"auto_approve\", \"to\": \"notify_result\"},\n    {\"id\": \"notify_to_end\", \"from\": \"notify_result\", \"to\": \"end\"}\n  ],\n  \"variables\": {\n    \"auto_approve_threshold\": \"medium\"\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/workflows/definitions",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "workflows", "definitions"]
+						}
+					}
+				},
+				{
+					"name": "获取工作流定义列表",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/workflows/definitions",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "workflows", "definitions"]
+						}
+					}
+				},
+				{
+					"name": "获取工作流定义详情",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/workflows/definitions/{{workflow_definition_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "workflows", "definitions", "{{workflow_definition_id}}"]
+						}
+					}
+				},
+				{
+					"name": "验证工作流定义",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"id\": \"test_validation_workflow\",\n  \"name\": \"验证测试流程\",\n  \"description\": \"用于验证的测试流程\",\n  \"nodes\": [\n    {\n      \"id\": \"start\",\n      \"type\": \"start\",\n      \"name\": \"开始\"\n    },\n    {\n      \"id\": \"end\",\n      \"type\": \"end\",\n      \"name\": \"结束\"\n    }\n  ],\n  \"edges\": [\n    {\"id\": \"start_to_end\", \"from\": \"start\", \"to\": \"end\"}\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/workflows/definitions/validate",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "workflows", "definitions", "validate"]
+						}
+					}
+				},
+				{
+					"name": "启动任务分配审批流程",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    if (response.data && response.data.id) {",
+									"        pm.globals.set('workflow_instance_id', response.data.id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"task_id\": 1,\n  \"assignee_id\": 2,\n  \"assignment_type\": \"manual\",\n  \"priority\": \"high\",\n  \"reason\": \"需要审批的高优先级任务分配\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/workflows/task-assignment/start",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "workflows", "task-assignment", "start"]
+						}
+					}
+				},
+				{
+					"name": "启动任务分配审批",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"task_id\": {{task_id}},\n    \"assignee_id\": {{employee_id}},\n    \"assignment_type\": \"manual\",\n    \"priority\": \"high\",\n    \"reason\": \"需要审批的任务分配\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/workflows/task-assignment/start",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "workflows", "task-assignment", "start"]
+						}
+					}
+				},
+				{
+					"name": "获取待审批任务",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/workflows/approvals/pending",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "workflows", "approvals", "pending"]
+						}
+					}
+				},
+				{
+					"name": "处理审批",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"instance_id\": \"workflow_instance_id\",\n    \"node_id\": \"approval_node\",\n    \"action\": \"approve\",\n    \"comment\": \"同意分配\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/workflows/approvals/process",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "workflows", "approvals", "process"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "6. 通知管理",
+			"item": [
+				{
+					"name": "获取通知列表",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/notifications",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "notifications"]
+						}
+					}
+				},
+				{
+					"name": "获取未读通知数量",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/notifications/count",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "notifications", "count"]
+						}
+					}
+				},
+				{
+					"name": "标记通知已读",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/notifications/1/read",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "notifications", "1", "read"]
+						}
+					}
+				}
+			]
+		}
+	]
+}

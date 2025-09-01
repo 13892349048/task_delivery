@@ -16,9 +16,9 @@ database:
   driver: "mysql"
   host: "localhost"
   port: 3306
-  username: "test_user"
-  password: "test_password"
-  database: "taskmanage_test"
+  username: "root"
+  password: "root"
+  database: "task_delivery"
   charset: "utf8mb4"
   max_idle_conns: 2
   max_open_conns: 10
